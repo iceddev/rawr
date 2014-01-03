@@ -58,7 +58,7 @@
               }
             }
           });
-          func.apply(null, data.params);
+          func.apply(socket, data.params);
         } else {
           rpcEmit(null, 'method undefined', data.id);
         }
