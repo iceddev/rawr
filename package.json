@@ -1,10 +1,10 @@
 {
   "name": "rawr",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "JSON-RPC over WebSockets",
   "main": "main.js",
   "dependencies": {
-    "when": "~2.7.1"
+    "when": "^3.7.7"
   },
   "devDependencies": {},
   "scripts": {
