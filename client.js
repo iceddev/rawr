@@ -6,18 +6,23 @@
     var when = require('when');
 
     function Rawr(socket){
-      // Make sure we have a socket with send and on
-      if(!(socket && (socket.on || socket.hasOwnProperty('onmessage')) && socket.send)){
-        return console.warn('Must pass in a socket or an object with a socket property to this cosntructor. ex: {socket : mySocket}');
-      }
 
       var self = this;
-      var defer = when.defer();
-      this.then = function(onSuccess, onError){
-        return defer.promise.then(onSuccess, onError);
-      };
-      this.socket = socket;
-      this.methods = {};
+
+      var rejecter, resolver;
+      self.promise = when.promise(function(resolve, reject, notify) {
+        resolver = resolve;
+        rejecter = reject;
+      });
+
+      // Make sure we have a socket with send and on
+      if(!(socket && socket.send)){
+        return rejecter('Must pass in a socket or an object with a socket property to this cosntructor. ex: {socket : mySocket}');
+      }
+
+
+      self.socket = socket;
+      self.methods = {};
 
       var _callNum = 0;
       var _deferreds = {};
@@ -38,15 +43,16 @@
       // TODO: implement notifications
 
       function smdHandler(smd){
+
         if(!(smd && smd.services)){
-          return defer.reject('Malformed SMD - missing services');
+          return rejecter('Malformed SMD - missing services');
         }
 
         for(var service in smd.services){
           self.methods[service] = generateRpc(service, self.socket);
         }
 
-        return defer.resolve(self.methods);
+        return resolver(self.methods);
       }
 
       function rpcHandler(rpc){
