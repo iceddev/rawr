@@ -1,0 +1,5 @@
+node_modules/
+build/
+coverage/
+examples/webworker/public
+examples/websocket/public

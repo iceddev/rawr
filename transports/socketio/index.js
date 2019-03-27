@@ -1,13 +1,13 @@
 const { EventEmitter } = require('events');
 
-function adapter({connection, subTopic, pubTopic}) {
+function adapter({ connection, subTopic, pubTopic }) {
   const emitter = new EventEmitter();
-  connection.on(subTopic, function (msg) {
-    if(msg.method || (msg.id && msg.hasOwnProperty('result'))) {
+  connection.on(subTopic, (msg) => {
+    if (msg.method || (msg.id && 'result' in msg)) {
       emitter.emit('rpc', msg);
     }
   });
-  emitter.send = function(msg) {
+  emitter.send = (msg) => {
     connection.emit(pubTopic, msg);
   };
   return emitter;

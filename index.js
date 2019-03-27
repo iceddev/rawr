@@ -7,80 +7,76 @@ function rawr({ transport, timeout = 0, handlers = {} }) {
   const notificationEvents = new EventEmitter();
   notificationEvents.on = notificationEvents.on.bind(notificationEvents);
 
-  transport.on('rpc', function(msg) {
-    if(msg.id) {
-      if(msg.params && methodHandlers[msg.method]) { //handle the request
+  transport.on('rpc', (msg) => {
+    if (msg.id) {
+      // handle an RPC request
+      if (msg.params && methodHandlers[msg.method]) {
         methodHandlers[msg.method](msg);
         return;
       }
-      else { //handle the result
-        const promise = pendingCalls[msg.id];
-        if(promise) {
-          if(promise.timeoutId) {
-            clearTimeout(promise.timeoutId);
-          }
-          delete pendingCalls[msg.id];
-          if (msg.error) {
-            promise.reject(msg.error);
-          }
-          else {
-            promise.resolve(msg.result);
-          }
+      // handle an RPC result
+      const promise = pendingCalls[msg.id];
+      if (promise) {
+        if (promise.timeoutId) {
+          clearTimeout(promise.timeoutId);
         }
-        return;
+        delete pendingCalls[msg.id];
+        if (msg.error) {
+          promise.reject(msg.error);
+        }
+        return promise.resolve(msg.result);
       }
+      return;
     }
-    
-    // handle notification
+    // handle a notification
     msg.params.unshift(msg.method);
-    notificationEvents.emit.apply(notificationEvents, msg.params);
+    notificationEvents.emit(...msg.params);
   });
 
   function addHandler(methodName, handler) {
-    methodHandlers[methodName] = function(msg) {
+    methodHandlers[methodName] = (msg) => {
       Promise.resolve()
-        .then(function() {
+        .then(() => {
           return handler.apply(this, msg.params);
         })
-        .then(function(result) {
+        .then((result) => {
           transport.send({
             id: msg.id,
-            result: result
+            result
           });
         })
-        .catch(function(error) {
-          const serializedError = {message: error.message};
-          if(error.code) {
+        .catch((error) => {
+          const serializedError = { message: error.message };
+          if (error.code) {
             serializedError.code = error.code;
-          } 
+          }
           transport.send({
             id: msg.id,
             error: serializedError
           });
         });
-    }
+    };
   }
 
-  for (const m in handlers) {
+  Object.keys(handlers).forEach((m) => {
     addHandler(m, handlers[m]);
-  }
+  });
 
   const methods = new Proxy({}, {
-    get: function(target, name) {
-
-      return function (...args) {
+    get: (target, name) => {
+      return (...args) => {
         const id = ++callId;
         const msg = {
-          jsonrpc : '2.0',
+          jsonrpc: '2.0',
           method: name,
           params: args,
           id
         };
 
         let timeoutId;
-        if(timeout) {
-          timeoutId = setTimeout(function() {
-            if(pendingCalls[id]) {
+        if (timeout) {
+          timeoutId = setTimeout(() => {
+            if (pendingCalls[id]) {
               const err = new Error('RPC timeout');
               err.code = 504;
               pendingCalls[id].reject(err);
@@ -88,45 +84,47 @@ function rawr({ transport, timeout = 0, handlers = {} }) {
             }
           }, timeout);
         }
-        
-        const response = new Promise(function(resolve, reject) {
-          pendingCalls[id] = { resolve: resolve, reject: reject, timeoutId: timeoutId };
+
+        const response = new Promise((resolve, reject) => {
+          pendingCalls[id] = { resolve, reject, timeoutId };
         });
 
         transport.send(msg);
 
         return response;
-      }
+      };
     }
   });
 
   const notifiers = new Proxy({}, {
-    get: function(target, name) {
-
-      return function (...args) {
+    get: (target, name) => {
+      return (...args) => {
         const msg = {
-          jsonrpc : '2.0',
+          jsonrpc: '2.0',
           method: name,
           params: args
         };
         transport.send(msg);
-        return;
-      }
+      };
     }
   });
 
   const notifications = new Proxy({}, {
-    get: function(target, name) {
-      return function (callback) {
-        notificationEvents.on(name.substring(2), function(...args) {
+    get: (target, name) => {
+      return (callback) => {
+        notificationEvents.on(name.substring(2), (...args) => {
           return callback.apply(callback, args);
         });
-      }
+      };
     }
   });
 
-  return { methods, addHandler, notifications, notifiers };
-
+  return {
+    methods,
+    addHandler,
+    notifications,
+    notifiers
+  };
 }
 
 module.exports = rawr;

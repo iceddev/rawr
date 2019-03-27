@@ -4,7 +4,7 @@ const transport = require('../../transports/worker');
 const myWorker = new Worker('/worker-bundle.js');
 
 // create the rawr peer
-const rawPeer = rawr({transport: transport(myWorker)});
+const rawPeer = rawr({ transport: transport(myWorker) });
 
 // handle requests from the webworker
 rawPeer.addHandler('getRandom', () => Math.random());

@@ -1,18 +1,23 @@
 {
   "name": "rawr",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "description": "JSON-RPC over simple event emitters",
-  "dependencies": {
-    "coveralls": "^3.0.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "chai": "^4.2.0",
+    "coveralls": "^3.0.3",
+    "eslint": "^5.15.3",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4",
     "istanbul": "^0.4.5",
     "mocha": "^6.0.2"
   },
   "main": "index.js",
   "scripts": {
-    "test": "istanbul cover _mocha && npm run check-coverage",
+    "lint": "eslint . --ext .js",
+    "test": "npm run lint && istanbul cover _mocha && npm run check-coverage",
     "check-coverage": "istanbul check-coverage --statements 100 --branches 75 --lines 100 --functions 100",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
