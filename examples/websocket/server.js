@@ -3,8 +3,8 @@ const http = require('http');
 const WebSocket = require('ws');
 const rawr = require('../../');
 const wsTransport = require('../../transports/websocket');
-const app = express();
 
+const app = express();
 app.use(express.static('public'));
 
 const server = http.createServer(app);
@@ -15,7 +15,7 @@ function add(x, y) {
 }
 
 wss.on('connection', (socket) => {
-  const rawrPeer = rawr({ transport: wsTransport(socket) })
+  const rawrPeer = rawr({ transport: wsTransport(socket) });
   rawrPeer.addHandler('add', add);
 
   // make RPC calls to the client
@@ -29,9 +29,7 @@ wss.on('connection', (socket) => {
     console.log('disconnected');
     clearInterval(intervalId);
   });
-  
 });
-
 
 server.listen(8080, () => {
   console.log('Listening on %d', server.address().port);

@@ -6,11 +6,10 @@ function add(x, y) {
 }
 
 // create the rawr peer
-const rawrPeer = rawr({transport: transport(), handlers: { add }});
+const rawrPeer = rawr({ transport: transport(), handlers: { add } });
 
 // make RPC calls to the DOM
 setInterval(async () => {
   const val = await rawrPeer.methods.getRandom();
   console.log('random from DOM', val);
 }, 1000);
-

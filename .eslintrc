@@ -1,0 +1,29 @@
+{
+  // enable airbnb eslint from https://www.npmjs.com/package/eslint-config-airbnb
+  "extends": "airbnb",
+    "rules": {
+      "consistent-return": [0, { "treatUndefinedAsUnspecified": true }],
+      "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
+      "no-multi-assign": "off",
+      "no-console": "off",
+      "no-plusplus": "off",
+      "camelcase": "off",
+      "comma-dangle": "off",
+      "prefer-template": "off",
+      "object-curly-newline": "off",
+      "no-restricted-globals": "off", // WTF?  `self` should be fine
+      "quotes": [ "error", "single", { "allowTemplateLiterals": true}],
+      "arrow-body-style": "off",
+      "import/no-unresolved": "off",
+      "max-len": [2, 120, 2]
+    },
+    "env": {
+      "browser": true,
+      "node": true,
+      "worker": true
+    },
+    "globals": {
+      "it": "readonly",
+      "describe": "readonly"
+    }
+}

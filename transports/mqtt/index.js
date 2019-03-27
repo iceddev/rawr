@@ -1,23 +1,23 @@
 const { EventEmitter } = require('events');
 
-function adapter({connection, subTopic, pubTopic, subscribe = true}) {
+function adapter({ connection, subTopic, pubTopic, subscribe = true }) {
   const emitter = new EventEmitter();
-  if(subscribe) {
+  if (subscribe) {
     connection.subscribe(subTopic);
   }
-  connection.on('message', function (topic, message) {
-    if(topic === subTopic) {
+  connection.on('message', (topic, message) => {
+    if (topic === subTopic) {
       try {
         const msg = JSON.parse(message.toString());
-        if(msg.method || (msg.id && msg.hasOwnProperty('result'))) {
+        if (msg.method || (msg.id && 'result' in msg)) {
           emitter.emit('rpc', msg);
         }
-      } catch(err) {
+      } catch (err) {
         console.error(err);
       }
     }
   });
-  emitter.send = function(msg) {
+  emitter.send = (msg) => {
     connection.publish(pubTopic, JSON.stringify(msg));
   };
   return emitter;

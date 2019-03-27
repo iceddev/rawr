@@ -3,10 +3,9 @@ const wsTransport = require('../../transports/websocket');
 
 const ws = new WebSocket('ws://localhost:8080');
 
-ws.onopen = (event) => {
-
+ws.onopen = () => {
   // create the rawr peer
-  const rawPeer = rawr({transport: wsTransport(ws)});
+  const rawPeer = rawr({ transport: wsTransport(ws) });
 
   // handle requests from the websocket server
   rawPeer.addHandler('getRandom', () => Math.random());
@@ -18,5 +17,4 @@ ws.onopen = (event) => {
     const result = await rawPeer.methods.add(num1, num2);
     document.getElementById('result').innerHTML = result;
   }, false);
-
 };
