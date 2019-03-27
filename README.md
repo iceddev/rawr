@@ -16,9 +16,9 @@ Remote Procedure Calls ([JSON-RPC](http://json-rpc.org/wiki/specification)) sent
 
 ## Using rawr with a webworker
 
-Every rawr client can act as both a client and a server, and make RPC calls in either direction.
+Every rawr client can act as both a client and a server, and make remote function calls in either direction.
 
-For example, if we want to use rawr to make calls to a webworker:
+For example, if we want the browser to call functions that belong to a webworker:
 ```javascript
 import rawr from 'rawr';
 import transport from 'rawr/tansports/worker';
