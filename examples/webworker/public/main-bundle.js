@@ -1,11 +1,11 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const rawr = require('../../');
-const { dom } = require('../../transports/worker');
+const transport = require('../../transports/worker');
 
 const myWorker = new Worker('/worker-bundle.js');
 
 // create the rawr peer
-const rawPeer = rawr({transport: dom(myWorker)});
+const rawPeer = rawr({transport: transport(myWorker)});
 
 // handle requests from the webworker
 rawPeer.addHandler('getRandom', () => Math.random());
@@ -439,7 +439,17 @@ function rawr({ transport, timeout = 0, handlers = {} }) {
     }
   });
 
-  return { methods, addHandler, onNotification: notificationEvents.on, notifiers };
+  const notifications = new Proxy({}, {
+    get: function(target, name) {
+      return function (callback) {
+        notificationEvents.on(name.substring(2), function(...args) {
+          return callback.apply(callback, args);
+        });
+      }
+    }
+  });
+
+  return { methods, addHandler, notifications, notifiers };
 
 }
 
@@ -476,8 +486,16 @@ function worker() {
   return emitter;
 }
 
-module.exports = {
-  dom,
-  worker
-};
+function transport(webWorker) {
+  if(webWorker) {
+    return dom(webWorker);
+  }
+  return worker();
+}
+
+//backwards compat
+transport.dom = dom;
+transport.worker = worker;
+
+module.exports = transport;
 },{"events":2}]},{},[1]);

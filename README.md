@@ -28,11 +28,11 @@ Every rawr client can act as both a client and a server, and make RPC calls in e
 For example, if we want to use rawr to make calls to a webworker:
 ```javascript
 import rawr from 'rawr';
-import { dom } from 'rawr/tansports/worker';
+import transport from 'rawr/tansports/worker';
 
 const myWorker = new Worker('/my-worker.js');
 
-const peer = rawr({transport: dom(myWorker)});
+const peer = rawr({transport: transport(myWorker)});
 
 const result = await peer.methods.doSomething('lots of data');
 ```
@@ -40,9 +40,9 @@ const result = await peer.methods.doSomething('lots of data');
 Our WebWorker code might look something like:
 ```javascript
 import rawr from 'rawr';
-import { worker } from 'rawr/tansports/worker';
+import transport from 'rawr/tansports/worker';
 
-const peer = rawr({transport: worker(), handlers: {doSomething}});
+const peer = rawr({transport: transport(), handlers: {doSomething}});
 
 function doSomething(inputData) {
   // do some heavy lifting in this thread
@@ -52,8 +52,8 @@ function doSomething(inputData) {
 
 ## Using rawr with a websocket
 
-We could even to this type of call to a remote server such as a websocket.
-Simply use a differnt transport:
+We could even to this type of call to make calls to a remote server such as a websocket.
+Simply use a different transport:
 ```javascript
 import rawr from 'rawr';
 import wsTransport from 'rawr/tansports/websocket';
@@ -78,7 +78,7 @@ socketServer.on('connection', (socket) => {
 
 ## Handling Notifications
 
-Peers can also send each other notifications:
+Peers can also send each other [notifications](https://www.jsonrpc.org/specification#notification):
 
 ```javascript
 peer.notifiers.saySomething('hello');

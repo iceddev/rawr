@@ -1,12 +1,12 @@
 const rawr = require('../../');
-const { worker } = require('../../transports/worker');
+const transport = require('../../transports/worker');
 
 function add(x, y) {
   return x + y;
 }
 
 // create the rawr peer
-const rawrPeer = rawr({transport: worker(), handlers: { add }});
+const rawrPeer = rawr({transport: transport(), handlers: { add }});
 
 // make RPC calls to the DOM
 setInterval(async () => {

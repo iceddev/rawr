@@ -1,6 +1,6 @@
 {
   "name": "rawr",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "JSON-RPC over simple event emitters",
   "dependencies": {
     "coveralls": "^3.0.3"

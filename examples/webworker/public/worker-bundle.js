@@ -304,14 +304,14 @@ function isUndefined(arg) {
 
 },{}],2:[function(require,module,exports){
 const rawr = require('../../');
-const { worker } = require('../../transports/worker');
+const transport = require('../../transports/worker');
 
 function add(x, y) {
   return x + y;
 }
 
 // create the rawr peer
-const rawrPeer = rawr({transport: worker(), handlers: { add }});
+const rawrPeer = rawr({transport: transport(), handlers: { add }});
 
 // make RPC calls to the DOM
 setInterval(async () => {
@@ -438,7 +438,17 @@ function rawr({ transport, timeout = 0, handlers = {} }) {
     }
   });
 
-  return { methods, addHandler, onNotification: notificationEvents.on, notifiers };
+  const notifications = new Proxy({}, {
+    get: function(target, name) {
+      return function (callback) {
+        notificationEvents.on(name.substring(2), function(...args) {
+          return callback.apply(callback, args);
+        });
+      }
+    }
+  });
+
+  return { methods, addHandler, notifications, notifiers };
 
 }
 
@@ -475,8 +485,16 @@ function worker() {
   return emitter;
 }
 
-module.exports = {
-  dom,
-  worker
-};
+function transport(webWorker) {
+  if(webWorker) {
+    return dom(webWorker);
+  }
+  return worker();
+}
+
+//backwards compat
+transport.dom = dom;
+transport.worker = worker;
+
+module.exports = transport;
 },{"events":1}]},{},[2]);

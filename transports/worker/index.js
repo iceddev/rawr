@@ -28,7 +28,15 @@ function worker() {
   return emitter;
 }
 
-module.exports = {
-  dom,
-  worker
-};
+function transport(webWorker) {
+  if(webWorker) {
+    return dom(webWorker);
+  }
+  return worker();
+}
+
+//backwards compat
+transport.dom = dom;
+transport.worker = worker;
+
+module.exports = transport;
