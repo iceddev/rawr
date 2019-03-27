@@ -52,7 +52,7 @@ function doSomething(inputData) {
 
 ## Using rawr with a websocket
 
-We could even to this type of call to make calls to a remote server such as a websocket.
+We could use rawr to make calls to a remote server such as a websocket.
 Simply use a different transport:
 ```javascript
 import rawr from 'rawr';
