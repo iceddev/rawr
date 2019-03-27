@@ -56,22 +56,22 @@ We could even to this type of call to make calls to a remote server such as a we
 Simply use a different transport:
 ```javascript
 import rawr from 'rawr';
-import wsTransport from 'rawr/tansports/websocket';
+import transport from 'rawr/tansports/websocket';
 
-const ws = new WebSocket('ws://localhost:8080');
+const socket = new WebSocket('ws://localhost:8080');
 
-ws.onopen = (event) => {
+socket.onopen = (event) => {
   // create the rawr peer
-  const peer = rawr({transport: wsTransport(ws)});
+  const peer = rawr({transport: transport(socket)});
 };
 ```
 
 The websocket server could even make arbitrary calls to the client!
 ```javascript
 socketServer.on('connection', (socket) => {
-  const peer = rawr({ transport: wsTransport(socket) })
+  const peer = rawr({ transport: transport(socket) })
 
-  const val = await peer.methods.doSomethingOnClient();
+  const result = await peer.methods.doSomethingOnClient();
   
 });
 ```
