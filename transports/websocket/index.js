@@ -1,8 +1,12 @@
 const { EventEmitter } = require('events');
 
-function transport(socket) {
+function transport(socket, allowBinary = false) {
   const emitter = new EventEmitter();
-  socket.addEventListener('message', (evt) => {
+  socket.addEventListener('message', async (evt) => {
+    let { data } = evt;
+    if (allowBinary && data instanceof Blob) {
+      data = await (new Response(data)).text().catch(() => null);
+    }
     if (typeof evt.data === 'string') {
       try {
         const msg = JSON.parse(evt.data);
