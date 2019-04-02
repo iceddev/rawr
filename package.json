@@ -1,9 +1,10 @@
 {
   "name": "rawr",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "JSON-RPC over simple event emitters",
   "dependencies": {},
   "devDependencies": {
+    "browserify": "^16.2.3",
     "chai": "^4.2.0",
     "coveralls": "^3.0.3",
     "eslint": "^5.15.3",
@@ -18,6 +19,7 @@
   "scripts": {
     "lint": "eslint . --ext .js",
     "test": "npm run lint && istanbul cover _mocha && npm run check-coverage",
+    "build": "browserify global.js -o dist/bundle.js",
     "check-coverage": "istanbul check-coverage --statements 100 --branches 75 --lines 100 --functions 100",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
   },
