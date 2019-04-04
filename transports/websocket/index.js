@@ -10,7 +10,7 @@ function transport(socket, allowBinary = false) {
     if (typeof evt.data === 'string') {
       try {
         const msg = JSON.parse(evt.data);
-        if (msg.method || (msg.id && 'result' in msg)) {
+        if (msg.method || (msg.id && ('result' in msg || 'error' in msg))) {
           emitter.emit('rpc', msg);
         }
       } catch (err) {

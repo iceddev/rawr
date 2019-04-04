@@ -1,9 +1,9 @@
 const { EventEmitter } = require('events');
 
-function adapter({ connection, subTopic, pubTopic }) {
+function transport({ connection, subTopic, pubTopic }) {
   const emitter = new EventEmitter();
   connection.on(subTopic, (msg) => {
-    if (msg.method || (msg.id && 'result' in msg)) {
+    if (msg.method || (msg.id && ('result' in msg || 'error' in msg))) {
       emitter.emit('rpc', msg);
     }
   });
@@ -13,4 +13,4 @@ function adapter({ connection, subTopic, pubTopic }) {
   return emitter;
 }
 
-module.exports = adapter;
+module.exports = transport;

@@ -679,7 +679,7 @@ function functionBindPolyfill(context) {
 },{}],4:[function(require,module,exports){
 const { EventEmitter } = require('events');
 
-function adapter({ connection, subTopic, pubTopic, subscribe = true }) {
+function transport({ connection, subTopic, pubTopic, subscribe = true }) {
   const emitter = new EventEmitter();
   if (subscribe) {
     connection.subscribe(subTopic);
@@ -688,7 +688,7 @@ function adapter({ connection, subTopic, pubTopic, subscribe = true }) {
     if (topic === subTopic) {
       try {
         const msg = JSON.parse(message.toString());
-        if (msg.method || (msg.id && 'result' in msg)) {
+        if (msg.method || (msg.id && ('result' in msg || 'error' in msg))) {
           emitter.emit('rpc', msg);
         }
       } catch (err) {
@@ -702,15 +702,15 @@ function adapter({ connection, subTopic, pubTopic, subscribe = true }) {
   return emitter;
 }
 
-module.exports = adapter;
+module.exports = transport;
 
 },{"events":3}],5:[function(require,module,exports){
 const { EventEmitter } = require('events');
 
-function adapter({ connection, subTopic, pubTopic }) {
+function transport({ connection, subTopic, pubTopic }) {
   const emitter = new EventEmitter();
   connection.on(subTopic, (msg) => {
-    if (msg.method || (msg.id && 'result' in msg)) {
+    if (msg.method || (msg.id && ('result' in msg || 'error' in msg))) {
       emitter.emit('rpc', msg);
     }
   });
@@ -720,7 +720,7 @@ function adapter({ connection, subTopic, pubTopic }) {
   return emitter;
 }
 
-module.exports = adapter;
+module.exports = transport;
 
 },{"events":3}],6:[function(require,module,exports){
 const { EventEmitter } = require('events');
@@ -735,7 +735,7 @@ function transport(socket, allowBinary = false) {
     if (typeof evt.data === 'string') {
       try {
         const msg = JSON.parse(evt.data);
-        if (msg.method || (msg.id && 'result' in msg)) {
+        if (msg.method || (msg.id && ('result' in msg || 'error' in msg))) {
           emitter.emit('rpc', msg);
         }
       } catch (err) {
@@ -758,7 +758,7 @@ function dom(webWorker) {
   const emitter = new EventEmitter();
   webWorker.addEventListener('message', (msg) => {
     const { data } = msg;
-    if (data && (data.method || (data.id && 'result' in data))) {
+    if (data && (data.method || (data.id && ('result' in data || 'error' in data)))) {
       emitter.emit('rpc', data);
     }
   });
@@ -772,7 +772,7 @@ function worker() {
   const emitter = new EventEmitter();
   self.onmessage = (msg) => {
     const { data } = msg;
-    if (data && (data.method || (data.id && 'result' in data))) {
+    if (data && (data.method || (data.id && ('result' in data || 'error' in data)))) {
       emitter.emit('rpc', data);
     }
   };

@@ -1,6 +1,6 @@
 const { EventEmitter } = require('events');
 
-function adapter({ connection, subTopic, pubTopic, subscribe = true }) {
+function transport({ connection, subTopic, pubTopic, subscribe = true }) {
   const emitter = new EventEmitter();
   if (subscribe) {
     connection.subscribe(subTopic);
@@ -9,7 +9,7 @@ function adapter({ connection, subTopic, pubTopic, subscribe = true }) {
     if (topic === subTopic) {
       try {
         const msg = JSON.parse(message.toString());
-        if (msg.method || (msg.id && 'result' in msg)) {
+        if (msg.method || (msg.id && ('result' in msg || 'error' in msg))) {
           emitter.emit('rpc', msg);
         }
       } catch (err) {
@@ -23,4 +23,4 @@ function adapter({ connection, subTopic, pubTopic, subscribe = true }) {
   return emitter;
 }
 
-module.exports = adapter;
+module.exports = transport;
