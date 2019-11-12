@@ -6,9 +6,6 @@ Remote Procedure Calls ([JSON-RPC](http://json-rpc.org/wiki/specification)) sent
 
 ![RAWRpc](rawr.jpg)
 
-
-
-
 ## Installation
 
 `npm install rawr`
@@ -24,8 +21,8 @@ For example, we can use methods that belong to a webworker.
 ```javascript
 import rawr, { transports } from 'rawr';
 
-// In this instantiation, we can pass in an object to `methods`
-// that is exposed to our web page (see below)
+// In this instantiation, we can pass in an object to 
+// `methods` that is exposed to our web page (see below)
 const peer = rawr({
   transport: transports.worker(),
   methods: { calculatePrimes },
@@ -57,7 +54,9 @@ The methods are available to the rawr peer through the magic of [Proxies](https:
 ## Using rawr with a websocket
 
 We could use rawr to make calls to a remote server such as a websocket.
-Simply use a different transport:
+Simply use a different transport.
+
+#### on our web page:
 ```javascript
 import rawr, { transports } from 'rawr';
 
@@ -65,17 +64,22 @@ const socket = new WebSocket('ws://localhost:8080');
 
 socket.onopen = (event) => {
   // create the rawr peer
-  const peer = rawr({transport: transports.websocket(socket)});
+  const peer = rawr({
+    transport: transports.websocket(socket)
+  });
 };
 ```
 
-The websocket server could even make arbitrary calls to the client!
+The websocket server could even make *arbitrary calls to the client!*
+
+#### on the server:
 ```javascript
 socketServer.on('connection', (socket) => {
-  const peer = rawr({ transport: transports.websocket(socket) })
+  const peer = rawr({ 
+    transport: transports.websocket(socket) 
+  });
 
   const result = await peer.methods.doSomethingOnClient();
-  
 });
 ```
 
