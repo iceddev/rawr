@@ -20,22 +20,18 @@ Every rawr client can act as both a client and a server, and make remote functio
 
 For example, if we want the browser to call functions that belong to a webworker:
 ```javascript
-import rawr from 'rawr';
-import transport from 'rawr/tansports/worker';
+import rawr, { transports } from 'rawr';
 
-const myWorker = new Worker('/my-worker.js');
-
-const peer = rawr({transport: transport(myWorker)});
+const peer = rawr({transport: transports.worker(new Worker('/worker.js'))});
 
 const result = await peer.methods.doSomething('lots of data');
 ```
 
 Our WebWorker code might look something like:
 ```javascript
-import rawr from 'rawr';
-import transport from 'rawr/tansports/worker';
+import rawr, { transports } from 'rawr';
 
-const peer = rawr({transport: transport(), handlers: {doSomething}});
+const peer = rawr({transport: transports.worker(), handlers: {doSomething}});
 
 function doSomething(inputData) {
   // do some heavy lifting in this thread
@@ -48,21 +44,20 @@ function doSomething(inputData) {
 We could use rawr to make calls to a remote server such as a websocket.
 Simply use a different transport:
 ```javascript
-import rawr from 'rawr';
-import transport from 'rawr/tansports/websocket';
+import rawr, { transports } from 'rawr';
 
 const socket = new WebSocket('ws://localhost:8080');
 
 socket.onopen = (event) => {
   // create the rawr peer
-  const peer = rawr({transport: transport(socket)});
+  const peer = rawr({transport: transports.websocket(socket)});
 };
 ```
 
 The websocket server could even make arbitrary calls to the client!
 ```javascript
 socketServer.on('connection', (socket) => {
-  const peer = rawr({ transport: transport(socket) })
+  const peer = rawr({ transport: transports.websocket(socket) })
 
   const result = await peer.methods.doSomethingOnClient();
   

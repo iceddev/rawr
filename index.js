@@ -1,4 +1,5 @@
 const { EventEmitter } = require('events');
+const transports = require('./transports');
 
 function rawr({ transport, timeout = 0, handlers = {} }) {
   let callId = 0;
@@ -126,5 +127,7 @@ function rawr({ transport, timeout = 0, handlers = {} }) {
     notifiers
   };
 }
+
+rawr.transports = transports;
 
 module.exports = rawr;
