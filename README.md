@@ -51,6 +51,7 @@ const result = await peer.methods.calculatePrimes(349582);
 ```
 
 The methods are available to the rawr peer through the magic of [Proxies](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+
 ![Magic](magic.gif)
 
 ## Using rawr with a websocket
