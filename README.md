@@ -16,29 +16,38 @@ Remote Procedure Calls ([JSON-RPC](http://json-rpc.org/wiki/specification)) sent
 
 ## Using rawr with a webworker
 
-Every rawr client can act as both a client and a server, and make remote function calls in either direction.
+Every rawr client can act as both a client and a server, and make remote method calls in either direction.
 
-For example, if we want the browser to call functions that belong to a webworker:
+For example, we can use methods that belong to a webworker.
+
+In our worker.js file:
 ```javascript
 import rawr, { transports } from 'rawr';
 
-const myWorker = new Worker('/worker.js');
-const peer = rawr({transport: transports.worker(myWorker)});
-
-const result = await peer.methods.doSomething('lots of data');
-```
-
-Our WebWorker code might look something like:
-```javascript
-import rawr, { transports } from 'rawr';
-
-const peer = rawr({transport: transports.worker(), handlers: {doSomething}});
+const peer = rawr({
+  transport: transports.worker(),
+  handlers: { doSomething } //any methods we want to expose
+});
 
 function doSomething(inputData) {
   // do some heavy lifting in this thread
   // return a result
 }
 ```
+
+In our web page:
+```javascript
+import rawr, { transports } from 'rawr';
+
+const myWorker = new Worker('/worker.js');
+const peer = rawr({transport: transports.worker(myWorker)});
+
+// remote methods are automatically available!
+const result = await peer.methods.doSomething('lots of data');
+```
+
+Our WebWorker code might look something like:
+
 
 ## Using rawr with a websocket
 
