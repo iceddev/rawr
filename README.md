@@ -20,33 +20,35 @@ Every rawr client can act as both a client and a server, and make remote method 
 
 For example, we can use methods that belong to a webworker.
 
-In our worker.js file:
+#### In our worker.js file:
 ```javascript
 import rawr, { transports } from 'rawr';
 
+// In this instantiation, we can pass in an object to `methods`
+// that is exposed to our web page (see below)
 const peer = rawr({
   transport: transports.worker(),
-  handlers: { doSomething } //any methods we want to expose
+  methods: { calculatePrimes },
 });
 
-function doSomething(inputData) {
-  // do some heavy lifting in this thread
-  // return a result
+function calculatePrimes(howMany) {
+  // Do something CPU intensive in this thread that
+  // would otherwise be too expensive for our web page
+  ...
+  return primes;
 }
 ```
 
-In our web page:
+#### In our web page:
 ```javascript
 import rawr, { transports } from 'rawr';
 
 const myWorker = new Worker('/worker.js');
 const peer = rawr({transport: transports.worker(myWorker)});
 
-// remote methods are automatically available!
-const result = await peer.methods.doSomething('lots of data');
+// Remote methods are *~automatically available~*
+const result = await peer.methods.calculatePrimes(349582);
 ```
-
-Our WebWorker code might look something like:
 
 
 ## Using rawr with a websocket
