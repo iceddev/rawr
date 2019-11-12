@@ -2,8 +2,10 @@
 const { EventEmitter } = require('events');
 const transports = require('./transports');
 
-function rawr({ transport, timeout = 0, handlers = {} }) {
+function rawr({ transport, timeout = 0, handlers = {}, methods }) {
   let callId = 0;
+  // eslint-disable-next-line no-param-reassign
+  methods = methods || handlers; // backwards compat
   const pendingCalls = {};
   const methodHandlers = {};
   const notificationEvents = new EventEmitter();
@@ -60,11 +62,11 @@ function rawr({ transport, timeout = 0, handlers = {} }) {
     };
   }
 
-  Object.keys(handlers).forEach((m) => {
-    addHandler(m, handlers[m]);
+  Object.keys(methods).forEach((m) => {
+    addHandler(m, methods[m]);
   });
 
-  const methods = new Proxy({}, {
+  const methodsProxy = new Proxy({}, {
     get: (target, name) => {
       return (...args) => {
         const id = ++callId;
@@ -122,7 +124,7 @@ function rawr({ transport, timeout = 0, handlers = {} }) {
   });
 
   return {
-    methods,
+    methods: methodsProxy,
     addHandler,
     notifications,
     notifiers
