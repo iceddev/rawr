@@ -22,7 +22,8 @@ For example, if we want the browser to call functions that belong to a webworker
 ```javascript
 import rawr, { transports } from 'rawr';
 
-const peer = rawr({transport: transports.worker(new Worker('/worker.js'))});
+const myWorker = new Worker('/worker.js');
+const peer = rawr({transport: transports.worker(myWorker)});
 
 const result = await peer.methods.doSomething('lots of data');
 ```
