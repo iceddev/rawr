@@ -4,10 +4,7 @@
 
 Remote Procedure Calls ([JSON-RPC](http://json-rpc.org/wiki/specification)) sent over any [EventEmitter](https://nodejs.org/dist/latest-v8.x/docs/api/events.html#events_class_eventemitter)-based transport.  [WebWorkers](/transports/worker), [WebSockets](/transports/websocket), [MQTT](/transports/mqtt), and more!
 
-![RAWRpc](https://rawgithub.com/phated/badart/master/reptar_rawr.jpg)
-
-
-
+![RAWRpc](rawr.jpg)
 
 ## Installation
 
@@ -16,56 +13,73 @@ Remote Procedure Calls ([JSON-RPC](http://json-rpc.org/wiki/specification)) sent
 
 ## Using rawr with a webworker
 
-Every rawr client can act as both a client and a server, and make remote function calls in either direction.
+Every rawr client can act as both a client and a server, and make remote method calls in either direction.
 
-For example, if we want the browser to call functions that belong to a webworker:
+For example, we can use methods that belong to a webworker.
+
+#### In our worker.js file:
 ```javascript
-import rawr from 'rawr';
-import transport from 'rawr/tansports/worker';
+import rawr, { transports } from 'rawr';
 
-const myWorker = new Worker('/my-worker.js');
+// In this instantiation, we can pass in an object to 
+// `methods` that is exposed to our web page (see below)
+const peer = rawr({
+  transport: transports.worker(),
+  methods: { calculatePrimes },
+});
 
-const peer = rawr({transport: transport(myWorker)});
-
-const result = await peer.methods.doSomething('lots of data');
-```
-
-Our WebWorker code might look something like:
-```javascript
-import rawr from 'rawr';
-import transport from 'rawr/tansports/worker';
-
-const peer = rawr({transport: transport(), handlers: {doSomething}});
-
-function doSomething(inputData) {
-  // do some heavy lifting in this thread
-  // return a result
+function calculatePrimes(howMany) {
+  // Do something CPU intensive in this thread that
+  // would otherwise be too expensive for our web page
+  ...
+  return primes;
 }
 ```
+
+#### In our web page:
+```javascript
+import rawr, { transports } from 'rawr';
+
+const myWorker = new Worker('/worker.js');
+const peer = rawr({transport: transports.worker(myWorker)});
+
+// Remote methods are *~automatically available~*
+const result = await peer.methods.calculatePrimes(349582);
+```
+
+The methods are available to the rawr peer through the magic of [Proxies](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+
+![Magic](magic.gif)
 
 ## Using rawr with a websocket
 
 We could use rawr to make calls to a remote server such as a websocket.
-Simply use a different transport:
+Simply use a different transport.
+
+#### on our web page:
 ```javascript
-import rawr from 'rawr';
-import transport from 'rawr/tansports/websocket';
+import rawr, { transports } from 'rawr';
 
 const socket = new WebSocket('ws://localhost:8080');
 
 socket.onopen = (event) => {
   // create the rawr peer
-  const peer = rawr({transport: transport(socket)});
+  const peer = rawr({
+    transport: transports.websocket(socket)
+  });
 };
 ```
 
-The websocket server could even make arbitrary calls to the client!
+The websocket server could even make *arbitrary calls to the client!*
+
+#### on the server:
 ```javascript
 socketServer.on('connection', (socket) => {
-  const peer = rawr({ transport: transport(socket) })
+  const peer = rawr({ 
+    transport: transports.websocket(socket) 
+  });
 
   const result = await peer.methods.doSomethingOnClient();
-  
 });
 ```
 

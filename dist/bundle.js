@@ -1,26 +1,6 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-(function (global){
-const rawr = require('./');
-
-const mqtt = require('./transports/mqtt');
-const socketio = require('./transports/socketio');
-const worker = require('./transports/worker');
-const websocket = require('./transports/websocket');
-
-rawr.transports = {
-  mqtt,
-  socketio,
-  websocket,
-  worker
-};
-
-global.rawr = rawr;
-
-module.exports = rawr;
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./":2,"./transports/mqtt":4,"./transports/socketio":5,"./transports/websocket":6,"./transports/worker":7}],2:[function(require,module,exports){
 const { EventEmitter } = require('events');
+const transports = require('./transports');
 
 function rawr({ transport, timeout = 0, handlers = {} }) {
   let callId = 0;
@@ -149,9 +129,11 @@ function rawr({ transport, timeout = 0, handlers = {} }) {
   };
 }
 
+rawr.transports = transports;
+
 module.exports = rawr;
 
-},{"events":3}],3:[function(require,module,exports){
+},{"./transports":3,"events":2}],2:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -676,7 +658,19 @@ function functionBindPolyfill(context) {
   };
 }
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
+const mqtt = require('./mqtt');
+const socketio = require('./socketio');
+const websocket = require('./websocket');
+const worker = require('./worker');
+
+module.exports = {
+    mqtt,
+    socketio,
+    websocket,
+    worker
+};
+},{"./mqtt":4,"./socketio":5,"./websocket":6,"./worker":7}],4:[function(require,module,exports){
 const { EventEmitter } = require('events');
 
 function transport({ connection, subTopic, pubTopic, subscribe = true }) {
@@ -704,7 +698,7 @@ function transport({ connection, subTopic, pubTopic, subscribe = true }) {
 
 module.exports = transport;
 
-},{"events":3}],5:[function(require,module,exports){
+},{"events":2}],5:[function(require,module,exports){
 const { EventEmitter } = require('events');
 
 function transport({ connection, subTopic, pubTopic }) {
@@ -722,7 +716,7 @@ function transport({ connection, subTopic, pubTopic }) {
 
 module.exports = transport;
 
-},{"events":3}],6:[function(require,module,exports){
+},{"events":2}],6:[function(require,module,exports){
 const { EventEmitter } = require('events');
 
 function transport(socket, allowBinary = false) {
@@ -751,7 +745,7 @@ function transport(socket, allowBinary = false) {
 
 module.exports = transport;
 
-},{"events":3}],7:[function(require,module,exports){
+},{"events":2}],7:[function(require,module,exports){
 const { EventEmitter } = require('events');
 
 function dom(webWorker) {
@@ -795,4 +789,4 @@ transport.worker = worker;
 
 module.exports = transport;
 
-},{"events":3}]},{},[1]);
+},{"events":2}]},{},[1]);

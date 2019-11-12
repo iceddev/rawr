@@ -1,6 +1,5 @@
 const mqtt = require('mqtt');
 const rawr = require('../../');
-const mqttTransport = require('../../transports/mqtt');
 
 const connection = mqtt.connect('mqtt://localhost');
 
@@ -10,7 +9,7 @@ function getRandom() {
 
 // create the rawr peer
 const rawrPeer = rawr({
-  transport: mqttTransport({ connection, pubTopic: 'client-a', subTopic: 'client-b' }),
+  transport: rawr.transports.mqtt({ connection, pubTopic: 'client-a', subTopic: 'client-b' }),
   handlers: { getRandom },
   timeout: 1000
 });
