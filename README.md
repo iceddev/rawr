@@ -13,7 +13,7 @@ Remote Procedure Calls ([JSON-RPC](http://json-rpc.org/wiki/specification)) sent
 
 ## Using rawr with a webworker
 
-Every rawr client can act as both a client and a server, and make remote method calls in either direction.
+Every rawr peer can act as both a client and a server, and make remote method calls in either direction.
 
 For example, we can use methods that belong to a webworker.
 
