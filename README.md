@@ -4,7 +4,7 @@
 
 Remote Procedure Calls ([JSON-RPC](http://json-rpc.org/wiki/specification)) sent over any [EventEmitter](https://nodejs.org/dist/latest-v8.x/docs/api/events.html#events_class_eventemitter)-based transport.  [WebWorkers](/transports/worker), [WebSockets](/transports/websocket), [MQTT](/transports/mqtt), and more!
 
-![RAWRpc](https://rawgithub.com/phated/badart/master/reptar_rawr.jpg)
+![RAWRpc](rawr.jpg)
 
 
 
@@ -50,6 +50,8 @@ const peer = rawr({transport: transports.worker(myWorker)});
 const result = await peer.methods.calculatePrimes(349582);
 ```
 
+The methods are available to the rawr peer through the magic of [Proxies](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+![Magic](magic.gif)
 
 ## Using rawr with a websocket
 
