@@ -127,7 +127,8 @@ function rawr({ transport, timeout = 0, handlers = {}, methods }) {
     methods: methodsProxy,
     addHandler,
     notifications,
-    notifiers
+    notifiers,
+    transport,
   };
 }
 
