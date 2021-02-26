@@ -2,7 +2,7 @@
 const { EventEmitter } = require('events');
 const transports = require('./transports');
 
-function rawr({ transport, timeout = 0, handlers = {}, methods }) {
+function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {
   let callId = 0;
   // eslint-disable-next-line no-param-reassign
   methods = methods || handlers; // backwards compat
@@ -69,7 +69,7 @@ function rawr({ transport, timeout = 0, handlers = {}, methods }) {
   const methodsProxy = new Proxy({}, {
     get: (target, name) => {
       return (...args) => {
-        const id = ++callId;
+        const id = idGenerator ? idGenerator() : ++callId;
         const msg = {
           jsonrpc: '2.0',
           method: name,

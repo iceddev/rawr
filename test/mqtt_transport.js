@@ -31,7 +31,20 @@ function mockTransports() {
   });
   transportB.b = b;
 
-  return { transportA, transportB };
+  const transportDontSub = rawr.transports.mqtt({
+    connection: a,
+    pubTopic: 'aPub',
+    subTopic: 'bPub',
+    subscribe: false,
+  });
+
+  const transportBadTopic = rawr.transports.mqtt({
+    connection: a,
+    pubTopic: 'somethingElse',
+    subTopic: 'somethingElse',
+  });
+
+  return { transportA, transportB, transportDontSub, transportBadTopic };
 }
 
 function helloTest(name) {
@@ -65,6 +78,15 @@ describe('mqtt', () => {
     done();
   });
 
+  it('should make a client with an already subscribed transport', (done) => {
+    const { transportDontSub, transportB } = mockTransports();
+    transportB.b.publish('bPub', 'check bad json');
+    const client = rawr({ transport: transportDontSub });
+    client.should.be.a('object');
+    client.addHandler.should.be.a('function');
+    done();
+  });
+
   it('client should make a successful rpc call to another peer', async () => {
     const { transportA, transportB } = mockTransports();
     const clientA = rawr({ transport: transportA, handlers: { add } });
@@ -74,6 +96,16 @@ describe('mqtt', () => {
     const resultB = await clientB.methods.add(1, 2);
     resultA.should.equal(5);
     resultB.should.equal(3);
+  });
+
+  it('client should handle bad messages on topic', async () => {
+    const { transportA, transportB } = mockTransports();
+    const clientA = rawr({ transport: transportA });
+    const clientB = rawr({ transport: transportB, handlers: { subtract } });
+
+    transportA.a.publish('aPub', `{"something": "bad"}`);
+    const resultA = await clientA.methods.subtract(7, 2);
+    resultA.should.equal(5);
   });
 
   it('client should make an unsuccessful rpc call to a peer', async () => {
@@ -103,6 +135,19 @@ describe('mqtt', () => {
     const { transportA, transportB } = mockTransports();
     const clientA = rawr({ transport: transportA, handlers: { helloTest } });
     const clientB = rawr({ transport: transportB, timeout: 10 });
+
+    clientA.should.be.an('object');
+    try {
+      await clientB.methods.helloTest('luis');
+    } catch (error) {
+      error.code.should.equal(504);
+    }
+  });
+
+  it('client handle an rpc timeout becuase topic didnt match', async () => {
+    const { transportA, transportBadTopic } = mockTransports();
+    const clientA = rawr({ transport: transportA, handlers: { helloTest } });
+    const clientB = rawr({ transport: transportBadTopic, timeout: 10 });
 
     clientA.should.be.an('object');
     try {

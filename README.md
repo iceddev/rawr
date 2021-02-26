@@ -2,7 +2,7 @@
 
 [![NPM](https://nodei.co/npm/rawr.png?compact=true)](https://nodei.co/npm/rawr/)  [![CircleCI](https://circleci.com/gh/iceddev/rawr.svg?style=svg)](https://circleci.com/gh/iceddev/rawr)
 
-Remote Procedure Calls ([JSON-RPC](http://json-rpc.org/wiki/specification)) sent over any [EventEmitter](https://nodejs.org/dist/latest-v8.x/docs/api/events.html#events_class_eventemitter)-based transport.  [WebWorkers](/transports/worker), [WebSockets](/transports/websocket), [MQTT](/transports/mqtt), and more!
+Remote Procedure Calls ([JSON-RPC](https://www.jsonrpc.org/specification)) sent over any [EventEmitter](https://nodejs.org/dist/latest-v12.x/docs/api/events.html#events_class_eventemitter)-based transport.  [WebWorkers](/transports/worker), [WebSockets](/transports/websocket), [MQTT](/transports/mqtt), and more!
 
 ![RAWRpc](rawr.jpg)
 
@@ -98,3 +98,19 @@ peer.notifications.onsaySomething((words) => {
 });
 ```
 
+
+## Transports
+
+Transporst are simply [EventEmitters](https://nodejs.org/dist/latest-v12.x/docs/api/events.html#events_class_eventemitter) that do two things:
+
+They emit ([json-rpc](https://www.jsonrpc.org/specification)) objects on an `rpc` topic when receiving data.
+```javascript
+transport.emit('rpc', {jsonrpc:'2.0', id: 1, method: 'add', params: [2, 3]});
+```
+
+They send rpc objects out.
+```javascript
+transport.send({jsonrpc:'2.0', id: 1, method: 'subtract', params: [5, 4]});
+```
+
+While, websockets, mqtt, and webworkers are common, transports could be built from any form of communication you wish!
