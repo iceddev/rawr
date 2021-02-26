@@ -1,5 +1,6 @@
 const chai = require('chai');
 const { EventEmitter } = require('events');
+const b64id = require('b64id');
 const rawr = require('../');
 
 chai.should();
@@ -59,6 +60,17 @@ describe('rawr', () => {
     const { a, b } = mockTransports();
     const clientA = rawr({ transport: a, handlers: { add } });
     const clientB = rawr({ transport: b, handlers: { subtract } });
+
+    const resultA = await clientA.methods.subtract(7, 2);
+    const resultB = await clientB.methods.add(1, 2);
+    resultA.should.equal(5);
+    resultB.should.equal(3);
+  });
+
+  it('client should make a successful rpc call to another peer with custom id generators', async () => {
+    const { a, b } = mockTransports();
+    const clientA = rawr({ transport: a, handlers: { add }, idGenerator: b64id.generateId });
+    const clientB = rawr({ transport: b, handlers: { subtract, idGenerator: b64id.generateId } });
 
     const resultA = await clientA.methods.subtract(7, 2);
     const resultB = await clientB.methods.add(1, 2);

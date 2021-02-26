@@ -1,6 +1,6 @@
 # rawr (a.k.a. RAWRpc)
 
-[![NPM](https://nodei.co/npm/rawr.png?compact=true)](https://nodei.co/npm/rawr/)  [![CircleCI](https://circleci.com/gh/iceddev/rawr.svg?style=svg)](https://circleci.com/gh/iceddev/rawr)
+[![NPM](https://nodei.co/npm/rawr.png?compact=true)](https://nodei.co/npm/rawr/)  ![example workflow](https://github.com/iceddev/rawr/actions/workflows/workflow.yml/badge.svg)
 
 Remote Procedure Calls ([JSON-RPC](https://www.jsonrpc.org/specification)) sent over any [EventEmitter](https://nodejs.org/dist/latest-v12.x/docs/api/events.html#events_class_eventemitter)-based transport.  [WebWorkers](/transports/worker), [WebSockets](/transports/websocket), [MQTT](/transports/mqtt), and more!
 

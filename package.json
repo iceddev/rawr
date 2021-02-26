@@ -4,6 +4,7 @@
   "description": "JSON-RPC over simple event emitters",
   "dependencies": {},
   "devDependencies": {
+    "b64id": "^1.0.0",
     "browserify": "^16.2.3",
     "chai": "^4.2.0",
     "coveralls": "^3.0.3",
