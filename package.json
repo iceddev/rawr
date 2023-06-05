@@ -1,10 +1,10 @@
 {
   "name": "rawr",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "description": "JSON-RPC over simple event emitters",
   "dependencies": {},
   "devDependencies": {
-    "b64id": "^1.0.0",
+    "b64id": "^1.0.1",
     "browserify": "^16.2.3",
     "chai": "^4.2.0",
     "coveralls": "^3.0.3",
@@ -14,7 +14,7 @@
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-react": "^7.12.4",
     "istanbul": "^0.4.5",
-    "mocha": "^6.0.2"
+    "mocha": "^10.2.0"
   },
   "main": "index.js",
   "scripts": {
