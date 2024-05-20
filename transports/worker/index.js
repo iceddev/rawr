@@ -8,8 +8,8 @@ function dom(webWorker) {
       emitter.emit('rpc', data);
     }
   });
-  emitter.send = (msg) => {
-    webWorker.postMessage(msg);
+  emitter.send = (msg, config) => {
+    webWorker.postMessage(msg, config ? config.postMessageOptions : undefined);
   };
   return emitter;
 }
@@ -22,8 +22,8 @@ function worker() {
       emitter.emit('rpc', data);
     }
   };
-  emitter.send = (msg) => {
-    self.postMessage(msg);
+  emitter.send = (msg, config) => {
+    self.postMessage(msg, config ? config.postMessageOptions : undefined);
   };
   return emitter;
 }

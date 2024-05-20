@@ -48,6 +48,18 @@ function subtract(a, b) {
   return a - b;
 }
 
+function slowFunction() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve('slow');
+    }, 300);
+  });
+}
+
+function hi() {
+  return 'hi';
+}
+
 describe('rawr', () => {
   it('should make a client', (done) => {
     const client = rawr({ transport: mockTransports().a });
@@ -125,5 +137,30 @@ describe('rawr', () => {
     });
 
     clientB.notifiers.doSomething('testing_notification');
+  });
+
+  it('client should fail on a configured timeout', async () => {
+    const { a, b } = mockTransports();
+    const clientA = rawr({ transport: a, handlers: { slowFunction, hi } });
+    const clientB = rawr({ transport: b, handlers: { slowFunction, add } });
+
+    const resultA = await clientA.methodsExt.slowFunction({ timeout: 1000 });
+    resultA.should.equal('slow');
+    const resultA2 = await clientA.methodsExt.add(1, 2, null);
+    resultA2.should.equal(3);
+    try {
+      await clientB.methodsExt.slowFunction({ timeout: 100 });
+    
+    } catch (error) {
+      error.code.should.equal(504);
+    }
+    try {
+      await clientB.methodsExt.slowFunction('useless param', { timeout: 100 });
+    } catch (error) {
+      error.code.should.equal(504);
+    }
+    const resultB2 = await clientB.methodsExt.hi();
+    resultB2.should.equal('hi');
+
   });
 });

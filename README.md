@@ -114,3 +114,25 @@ transport.send({jsonrpc:'2.0', id: 1, method: 'subtract', params: [5, 4]});
 ```
 
 While, websockets, mqtt, and webworkers are common, transports could be built from any form of communication you wish!
+
+
+## Custom Configuration for Method invocations
+
+if you need to pass configuration specific method invocations, you can uses the `methodsExt` property of a rawr instance.
+
+For example, if you want to specify a specific timeout for a method call you can use a configuration object as the last parameter:
+```javascript
+try {
+  const result = await peer.methodsExt.doSomething(a, b, { timeout: 100 });
+} catch(e) {
+  // method took longer than a 100 millseconds
+}
+```
+
+This also works for customizaton of the transport.
+For example, you may want to pass configuration for transferable objects to a webWorker:
+```javascript
+  const result = await peer.methodsExt.processImage({ imageBitmap, stuff }, {
+    postMessageOptions: { transfer: [imageBitmap] }
+  });
+```
