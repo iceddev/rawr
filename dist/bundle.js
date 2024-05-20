@@ -66,39 +66,59 @@ function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {
     addHandler(m, methods[m]);
   });
 
+  function sendMessage(method, params, config) {
+    const id = idGenerator ? idGenerator() : ++callId;
+    const msg = {
+      jsonrpc: '2.0',
+      method,
+      params,
+      id
+    };
+
+    let timeoutId;
+    if (config.timeout || timeout) {
+      timeoutId = setTimeout(() => {
+        if (pendingCalls[id]) {
+          const err = new Error('RPC timeout');
+          err.code = 504;
+          pendingCalls[id].reject(err);
+          delete pendingCalls[id];
+        }
+      }, config.timeout || timeout);
+    }
+
+    const response = new Promise((resolve, reject) => {
+      pendingCalls[id] = { resolve, reject, timeoutId };
+    });
+
+    transport.send(msg, config);
+
+    return response;
+  }
+
   const methodsProxy = new Proxy({}, {
     get: (target, name) => {
       return (...args) => {
-        const id = idGenerator ? idGenerator() : ++callId;
-        const msg = {
-          jsonrpc: '2.0',
-          method: name,
-          params: args,
-          id
-        };
-
-        let timeoutId;
-        if (timeout) {
-          timeoutId = setTimeout(() => {
-            if (pendingCalls[id]) {
-              const err = new Error('RPC timeout');
-              err.code = 504;
-              pendingCalls[id].reject(err);
-              delete pendingCalls[id];
-            }
-          }, timeout);
-        }
-
-        const response = new Promise((resolve, reject) => {
-          pendingCalls[id] = { resolve, reject, timeoutId };
-        });
-
-        transport.send(msg);
-
-        return response;
+        return sendMessage(name, args, {});
       };
     }
   });
+
+  const configurableMethodsProxy = new Proxy({}, {
+    get: (target, name) => {
+      return (...args) => {
+        let config;
+        if (args.length) {
+          const testArg = args.pop();
+          if (testArg && typeof testArg === 'object' && !Array.isArray(testArg)) {
+            config = testArg;
+          }
+        }
+        return sendMessage(name, args, config || {});
+      };
+    }
+  });
+
 
   const notifiers = new Proxy({}, {
     get: (target, name) => {
@@ -125,6 +145,7 @@ function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {
 
   return {
     methods: methodsProxy,
+    methodsExt: configurableMethodsProxy,
     addHandler,
     notifications,
     notifiers,
@@ -759,8 +780,8 @@ function dom(webWorker) {
       emitter.emit('rpc', data);
     }
   });
-  emitter.send = (msg) => {
-    webWorker.postMessage(msg);
+  emitter.send = (msg, config) => {
+    webWorker.postMessage(msg, config ? config.postMessageOptions : undefined);
   };
   return emitter;
 }
@@ -773,8 +794,8 @@ function worker() {
       emitter.emit('rpc', data);
     }
   };
-  emitter.send = (msg) => {
-    self.postMessage(msg);
+  emitter.send = (msg, config) => {
+    self.postMessage(msg, config ? config.postMessageOptions : undefined);
   };
   return emitter;
 }
