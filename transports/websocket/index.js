@@ -1,4 +1,4 @@
-const { EventEmitter } = require('events');
+const EventEmitter = require('eventemitter3');
 
 function transport(socket, allowBinary = false) {
   const emitter = new EventEmitter();

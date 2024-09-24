@@ -1,5 +1,5 @@
 const chai = require('chai');
-const { EventEmitter } = require('events');
+const EventEmitter = require('eventemitter3');
 const rawr = require('../');
 
 chai.should();

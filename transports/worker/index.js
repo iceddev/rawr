@@ -1,4 +1,4 @@
-const { EventEmitter } = require('events');
+const EventEmitter = require('eventemitter3');
 
 function dom(webWorker) {
   const emitter = new EventEmitter();

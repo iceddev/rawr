@@ -1,4 +1,4 @@
-const { EventEmitter } = require('events');
+const EventEmitter = require('eventemitter3');
 const transports = require('./transports');
 
 function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {

@@ -1,4 +1,4 @@
-const { EventEmitter } = require('events');
+const EventEmitter = require('eventemitter3');
 
 function transport({ connection, subTopic, pubTopic, subscribe = true }) {
   const emitter = new EventEmitter();
