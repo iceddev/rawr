@@ -12,14 +12,20 @@ function mockTransports() {
   a.on('message', (msg) => {
     a.emit('rpc', msg);
   });
-  a.send = (msg) => {
+  a.send = (msg, config) => {
     b.emit('message', msg);
+    if (config) {
+      b.emit('config', config);
+    }
   };
 
   b.on('message', (msg) => {
     b.emit('rpc', msg);
   });
-  b.send = (msg) => {
+  b.send = (msg, config) => {
+    if (config) {
+      a.emit('config', config);
+    }
     a.emit('message', msg);
   };
 
@@ -137,6 +143,46 @@ describe('rawr', () => {
     });
 
     clientB.notifiers.doSomething('testing_notification');
+  });
+
+  it('client should have notifiersExt method', () => {
+    const { a } = mockTransports();
+    const client = rawr({ transport: a });
+    client.should.have.property('notifiersExt');
+    (typeof client.notifiersExt).should.equal('object');
+  });
+
+  it('client should be able to send a notification with notifiersExt', (done) => {
+    const { a, b } = mockTransports();
+    const clientA = rawr({ transport: a });
+    const clientB = rawr({ transport: b });
+
+    clientA.notifications.ondoSomething((someData) => {
+      someData.should.equal('testing_notification_ext');
+      done();
+    });
+
+    clientB.notifiersExt.doSomething('testing_notification_ext');
+  });
+
+  it('client should pass config to transport when using notifiersExt', (done) => {
+    const { a, b } = mockTransports();
+    const clientA = rawr({ transport: a });
+    const clientB = rawr({ transport: b });
+
+    let receivedConfig = false;
+    a.on('config', (config) => {
+      config.should.deep.equal({ postMessageOptions: { transfer: ['test'] } });
+      receivedConfig = true;
+    });
+
+    clientA.notifications.ondoConfigTest((someData) => {
+      someData.should.equal('config_test');
+      receivedConfig.should.equal(true);
+      done();
+    });
+
+    clientB.notifiersExt.doConfigTest('config_test', { postMessageOptions: { transfer: ['test'] } });
   });
 
   it('client should fail on a configured timeout', async () => {
