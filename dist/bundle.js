@@ -5,7 +5,7 @@ const transports = require('./transports');
 function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {
   let callId = 0;
   // eslint-disable-next-line no-param-reassign
-  methods = methods || handlers; // backwards compat
+  methods = methods || handlers || {}; // backwards compat
   const pendingCalls = {};
   const methodHandlers = {};
   const notificationEvents = new EventEmitter();
@@ -112,6 +112,8 @@ function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {
           const testArg = args.pop();
           if (testArg && typeof testArg === 'object' && !Array.isArray(testArg)) {
             config = testArg;
+          } else {
+            args.push(testArg);
           }
         }
         return sendMessage(name, args, config || {});
@@ -133,6 +135,28 @@ function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {
     }
   });
 
+  const configurableNotifiersProxy = new Proxy({}, {
+    get: (target, name) => {
+      return (...args) => {
+        let config;
+        if (args.length) {
+          const testArg = args.pop();
+          if (testArg && typeof testArg === 'object' && !Array.isArray(testArg)) {
+            config = testArg;
+          } else {
+            args.push(testArg);
+          }
+        }
+        const msg = {
+          jsonrpc: '2.0',
+          method: name,
+          params: args
+        };
+        transport.send(msg, config || {});
+      };
+    }
+  });
+
   const notifications = new Proxy({}, {
     get: (target, name) => {
       return (callback) => {
@@ -149,6 +173,7 @@ function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {
     addHandler,
     notifications,
     notifiers,
+    notifiersExt: configurableNotifiersProxy,
     transport,
   };
 }
