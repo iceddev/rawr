@@ -1,4 +1,13 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const rawr = require('./');
+const EventEmitter = require('eventemitter3');
+rawr.EventEmitter = EventEmitter;
+
+globalThis.Rawr = rawr;
+
+module.exports = rawr;
+
+},{"./":2,"eventemitter3":3}],2:[function(require,module,exports){
 const EventEmitter = require('eventemitter3');
 const transports = require('./transports');
 
@@ -182,7 +191,7 @@ rawr.transports = transports;
 
 module.exports = rawr;
 
-},{"./transports":3,"eventemitter3":2}],2:[function(require,module,exports){
+},{"./transports":4,"eventemitter3":3}],3:[function(require,module,exports){
 'use strict';
 
 var has = Object.prototype.hasOwnProperty
@@ -520,7 +529,7 @@ if ('undefined' !== typeof module) {
   module.exports = EventEmitter;
 }
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 const mqtt = require('./mqtt');
 const socketio = require('./socketio');
 const websocket = require('./websocket');
@@ -532,7 +541,7 @@ module.exports = {
     websocket,
     worker
 };
-},{"./mqtt":4,"./socketio":5,"./websocket":6,"./worker":7}],4:[function(require,module,exports){
+},{"./mqtt":5,"./socketio":6,"./websocket":7,"./worker":8}],5:[function(require,module,exports){
 const EventEmitter = require('eventemitter3');
 
 function transport({ connection, subTopic, pubTopic, subscribe = true }) {
@@ -560,7 +569,7 @@ function transport({ connection, subTopic, pubTopic, subscribe = true }) {
 
 module.exports = transport;
 
-},{"eventemitter3":2}],5:[function(require,module,exports){
+},{"eventemitter3":3}],6:[function(require,module,exports){
 const EventEmitter = require('eventemitter3');
 
 function transport({ connection, subTopic, pubTopic }) {
@@ -578,7 +587,7 @@ function transport({ connection, subTopic, pubTopic }) {
 
 module.exports = transport;
 
-},{"eventemitter3":2}],6:[function(require,module,exports){
+},{"eventemitter3":3}],7:[function(require,module,exports){
 const EventEmitter = require('eventemitter3');
 
 function transport(socket, allowBinary = false) {
@@ -607,7 +616,7 @@ function transport(socket, allowBinary = false) {
 
 module.exports = transport;
 
-},{"eventemitter3":2}],7:[function(require,module,exports){
+},{"eventemitter3":3}],8:[function(require,module,exports){
 const EventEmitter = require('eventemitter3');
 
 function dom(webWorker) {
@@ -651,4 +660,4 @@ transport.worker = worker;
 
 module.exports = transport;
 
-},{"eventemitter3":2}]},{},[1]);
+},{"eventemitter3":3}]},{},[1]);

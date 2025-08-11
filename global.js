@@ -1,5 +1,7 @@
 const rawr = require('./');
+const EventEmitter = require('eventemitter3');
+rawr.EventEmitter = EventEmitter;
 
-global.rawr = rawr;
+globalThis.Rawr = rawr;
 
 module.exports = rawr;
