@@ -72,16 +72,20 @@ socket.onopen = (event) => {
 
 The websocket server could even make *arbitrary calls to the client!*
 
-#### on the server:
+#### on the server (using [ws](https://github.com/websockets/ws)):
 ```javascript
+import rawr, { transports } from 'rawr';
+
 socketServer.on('connection', (socket) => {
-  const peer = rawr({ 
-    transport: transports.websocket(socket) 
+  const peer = rawr({
+    transport: transports.websocket(socket)
   });
 
   const result = await peer.methods.doSomethingOnClient();
 });
 ```
+
+The websocket transport works with both browser WebSocket and Node.js [ws](https://github.com/websockets/ws) library.
 
 ## Handling Notifications
 

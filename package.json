@@ -1,31 +1,27 @@
 {
   "name": "rawr",
-  "version": "0.19.0",
+  "version": "1.0.0",
   "description": "JSON-RPC over simple node style event emitters",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./transports": "./transports/index.js",
+    "./transports/websocket": "./transports/websocket/index.js",
+    "./transports/worker": "./transports/worker/index.js",
+    "./transports/mqtt": "./transports/mqtt/index.js",
+    "./transports/socketio": "./transports/socketio/index.js"
+  },
   "dependencies": {
     "eventemitter3": "^5.0.1"
   },
   "devDependencies": {
-    "b64id": "^1.0.1",
-    "browserify": "^16.2.3",
-    "chai": "^4.2.0",
-    "coveralls": "^3.0.3",
-    "eslint": "^5.15.3",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-jsx-a11y": "^6.2.1",
-    "eslint-plugin-react": "^7.12.4",
-    "istanbul": "^0.4.5",
-    "mocha": "^10.2.0"
+    "b64id": "^1.0.0",
+    "esbuild": "^0.24.0",
+    "vitest": "^2.0.0"
   },
-  "main": "index.js",
   "scripts": {
-    "lint": "eslint ./index.js --ext .js",
-    "test": "npm run lint && istanbul cover _mocha && npm run check-coverage",
-    "mocha": "_mocha",
-    "build": "browserify global.js -o dist/bundle.js",
-    "check-coverage": "istanbul check-coverage --statements 100 --branches 75 --lines 100 --functions 100",
-    "coveralls": "cat ./coverage/lcov.info | ./node_modules/.bin/coveralls"
+    "test": "vitest run",
+    "build": "esbuild global.js --bundle --format=iife --global-name=Rawr --outfile=dist/bundle.js && esbuild global.js --bundle --format=iife --global-name=Rawr --minify --outfile=dist/bundle.min.js"
   },
   "repository": {
     "type": "git",
@@ -42,7 +38,6 @@
   ],
   "author": "Luis Montes <luis@iceddev.com> (http://iceddev.com/)",
   "license": "MIT",
-  "readmeFilename": "README.md",
   "bugs": {
     "url": "https://github.com/iceddev/rawr/issues"
   }

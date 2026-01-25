@@ -1,9 +1,8 @@
-const EventEmitter = require('eventemitter3');
-const transports = require('./transports');
+import EventEmitter from 'eventemitter3';
+import * as transports from './transports/index.js';
 
-function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {
+export function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {
   let callId = 0;
-  // eslint-disable-next-line no-param-reassign
   methods = methods || handlers || {}; // backwards compat
   const pendingCalls = {};
   const methodHandlers = {};
@@ -177,6 +176,11 @@ function rawr({ transport, timeout = 0, handlers = {}, methods, idGenerator }) {
   };
 }
 
+// Attach transports to rawr for convenience
 rawr.transports = transports;
 
-module.exports = rawr;
+// Default export for backwards compatibility
+export default rawr;
+
+// Named exports
+export { transports };
