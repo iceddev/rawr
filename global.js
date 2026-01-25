@@ -1,7 +1,9 @@
-const rawr = require('./');
-const EventEmitter = require('eventemitter3');
+import rawr, { transports } from './index.js';
+import EventEmitter from 'eventemitter3';
+
 rawr.EventEmitter = EventEmitter;
+rawr.transports = transports;
 
 globalThis.Rawr = rawr;
 
-module.exports = rawr;
+export default rawr;

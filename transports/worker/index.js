@@ -1,5 +1,10 @@
-const EventEmitter = require('eventemitter3');
+import EventEmitter from 'eventemitter3';
 
+/**
+ * Worker transport for DOM side (main thread talking to worker)
+ * @param {Worker} webWorker - Web Worker instance
+ * @returns {EventEmitter} rawr-compatible transport
+ */
 function dom(webWorker) {
   const emitter = new EventEmitter();
   webWorker.addEventListener('message', (msg) => {
@@ -14,6 +19,10 @@ function dom(webWorker) {
   return emitter;
 }
 
+/**
+ * Worker transport for worker side (inside the worker)
+ * @returns {EventEmitter} rawr-compatible transport
+ */
 function worker() {
   const emitter = new EventEmitter();
   self.onmessage = (msg) => {
@@ -28,15 +37,17 @@ function worker() {
   return emitter;
 }
 
-function transport(webWorker) {
+/**
+ * Worker transport - auto-detects DOM or worker context
+ * @param {Worker} [webWorker] - Web Worker instance (omit if inside worker)
+ * @returns {EventEmitter} rawr-compatible transport
+ */
+export default function transport(webWorker) {
   if (webWorker) {
     return dom(webWorker);
   }
   return worker();
 }
 
-// backwards compat
-transport.dom = dom;
-transport.worker = worker;
-
-module.exports = transport;
+// Named exports for explicit usage
+export { dom, worker };

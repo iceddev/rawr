@@ -1,8 +1,6 @@
-const chai = require('chai');
-const EventEmitter = require('eventemitter3');
-const rawr = require('../');
-
-chai.should();
+import { describe, it, expect } from 'vitest';
+import EventEmitter from 'eventemitter3';
+import rawr, { transports } from '../index.js';
 
 function mockTransports() {
   const a = new EventEmitter();
@@ -10,7 +8,7 @@ function mockTransports() {
 
   a.originalEmit = a.emit;
   a.emit = (topic, msg) => {
-    if(topic === 'aPub') {
+    if (topic === 'aPub') {
       b.emit(topic, msg);
     } else {
       a.originalEmit(topic, msg);
@@ -19,19 +17,19 @@ function mockTransports() {
 
   b.originalEmit = b.emit;
   b.emit = (topic, msg) => {
-    if(topic === 'bPub') {
+    if (topic === 'bPub') {
       a.emit(topic, msg);
     } else {
       b.originalEmit(topic, msg);
     }
   };
 
-  const transportA = rawr.transports.socketio({
+  const transportA = transports.socketio({
     connection: a,
     pubTopic: 'aPub',
     subTopic: 'bPub'
   });
-  const transportB = rawr.transports.socketio({
+  const transportB = transports.socketio({
     connection: b,
     pubTopic: 'bPub',
     subTopic: 'aPub'
@@ -61,13 +59,12 @@ function subtract(a, b) {
   return a - b;
 }
 
-describe('socketio', () => {
-  it('should make a client', (done) => {
+describe('socketio transport', () => {
+  it('should make a client', () => {
     const { transportA } = mockTransports();
     const client = rawr({ transport: transportA });
-    client.should.be.a('object');
-    client.addHandler.should.be.a('function');
-    done();
+    expect(client).toBeTypeOf('object');
+    expect(client.addHandler).toBeTypeOf('function');
   });
 
   it('client should make a successful rpc call to another peer', async () => {
@@ -77,56 +74,59 @@ describe('socketio', () => {
 
     const resultA = await clientA.methods.subtract(7, 2);
     const resultB = await clientB.methods.add(1, 2);
-    resultA.should.equal(5);
-    resultB.should.equal(3);
+    expect(resultA).toBe(5);
+    expect(resultB).toBe(3);
   });
 
   it('client should make an unsuccessful rpc call to a peer', async () => {
     const { transportA, transportB } = mockTransports();
-    const clientA = rawr({ transport: transportA, handlers: { helloTest } });
+    rawr({ transport: transportA, handlers: { helloTest } });
     const clientB = rawr({ transport: transportB });
 
-    clientA.should.be.an('object');
     try {
       await clientB.methods.helloTest('bad');
+      expect.fail('Should have thrown');
     } catch (error) {
-      error.code.should.equal(9000);
+      expect(error.code).toBe(9000);
     }
   });
 
   it('client handle an rpc under a specified timeout', async () => {
     const { transportA, transportB } = mockTransports();
-    const clientA = rawr({ transport: transportA, handlers: { helloTest } });
+    rawr({ transport: transportA, handlers: { helloTest } });
     const clientB = rawr({ transport: transportB, timeout: 1000 });
 
-    clientA.should.be.an('object');
     const result = await clientB.methods.helloTest('luis');
-    result.should.equal('hello, luis');
+    expect(result).toBe('hello, luis');
   });
 
   it('client handle an rpc timeout', async () => {
     const { transportA, transportB } = mockTransports();
-    const clientA = rawr({ transport: transportA, handlers: { helloTest } });
+    rawr({ transport: transportA, handlers: { helloTest } });
     const clientB = rawr({ transport: transportB, timeout: 10 });
 
-    clientA.should.be.an('object');
     try {
       await clientB.methods.helloTest('luis');
+      expect.fail('Should have thrown');
     } catch (error) {
-      error.code.should.equal(504);
+      expect(error.code).toBe(504);
     }
   });
 
-  it('client should be able to send a notification to a server', (done) => {
+  it('client should be able to send a notification to a server', async () => {
     const { transportA, transportB } = mockTransports();
     const clientA = rawr({ transport: transportA });
     const clientB = rawr({ transport: transportB });
 
-    clientA.notifications.ondoSomething((someData) => {
-      someData.should.equal('testing_notification');
-      done();
+    const received = new Promise((resolve) => {
+      clientA.notifications.ondoSomething((someData) => {
+        resolve(someData);
+      });
     });
 
     clientB.notifiers.doSomething('testing_notification');
+
+    const result = await received;
+    expect(result).toBe('testing_notification');
   });
 });

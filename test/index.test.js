@@ -1,9 +1,7 @@
-const chai = require('chai');
-const EventEmitter = require('eventemitter3');
-const b64id = require('b64id');
-const rawr = require('../');
-
-chai.should();
+import { describe, it, expect } from 'vitest';
+import EventEmitter from 'eventemitter3';
+import { generateId } from 'b64id';
+import rawr from '../index.js';
 
 function mockTransports() {
   const a = new EventEmitter();
@@ -31,7 +29,6 @@ function mockTransports() {
 
   return { a, b };
 }
-
 
 function helloTest(name) {
   return new Promise((resolve, reject) => {
@@ -67,11 +64,10 @@ function hi() {
 }
 
 describe('rawr', () => {
-  it('should make a client', (done) => {
+  it('should make a client', () => {
     const client = rawr({ transport: mockTransports().a });
-    client.should.be.a('object');
-    client.addHandler.should.be.a('function');
-    done();
+    expect(client).toBeTypeOf('object');
+    expect(client.addHandler).toBeTypeOf('function');
   });
 
   it('client should make a successful rpc call to another peer', async () => {
@@ -81,108 +77,118 @@ describe('rawr', () => {
 
     const resultA = await clientA.methods.subtract(7, 2);
     const resultB = await clientB.methods.add(1, 2);
-    resultA.should.equal(5);
-    resultB.should.equal(3);
+    expect(resultA).toBe(5);
+    expect(resultB).toBe(3);
   });
 
   it('client should make a successful rpc call to another peer with custom id generators', async () => {
     const { a, b } = mockTransports();
-    const clientA = rawr({ transport: a, handlers: { add }, idGenerator: b64id.generateId });
-    const clientB = rawr({ transport: b, handlers: { subtract, idGenerator: b64id.generateId } });
+    const clientA = rawr({ transport: a, handlers: { add }, idGenerator: generateId });
+    const clientB = rawr({ transport: b, handlers: { subtract }, idGenerator: generateId });
 
     const resultA = await clientA.methods.subtract(7, 2);
     const resultB = await clientB.methods.add(1, 2);
-    resultA.should.equal(5);
-    resultB.should.equal(3);
+    expect(resultA).toBe(5);
+    expect(resultB).toBe(3);
   });
 
   it('client should make an unsuccessful rpc call to a peer', async () => {
     const { a, b } = mockTransports();
-    const clientA = rawr({ transport: a, handlers: { helloTest } });
+    rawr({ transport: a, handlers: { helloTest } });
     const clientB = rawr({ transport: b });
 
-    clientA.should.be.an('object');
     try {
       await clientB.methods.helloTest('bad');
+      expect.fail('Should have thrown');
     } catch (error) {
-      error.code.should.equal(9000);
+      expect(error.code).toBe(9000);
     }
   });
 
   it('client handle an rpc under a specified timeout', async () => {
     const { a, b } = mockTransports();
-    const clientA = rawr({ transport: a, handlers: { helloTest } });
+    rawr({ transport: a, handlers: { helloTest } });
     const clientB = rawr({ transport: b, timeout: 1000 });
 
-    clientA.should.be.an('object');
     const result = await clientB.methods.helloTest('luis');
-    result.should.equal('hello, luis');
+    expect(result).toBe('hello, luis');
   });
 
   it('client handle an rpc timeout', async () => {
     const { a, b } = mockTransports();
-    const clientA = rawr({ transport: a, handlers: { helloTest } });
+    rawr({ transport: a, handlers: { helloTest } });
     const clientB = rawr({ transport: b, timeout: 10 });
 
-    clientA.should.be.an('object');
     try {
       await clientB.methods.helloTest('luis');
+      expect.fail('Should have thrown');
     } catch (error) {
-      error.code.should.equal(504);
+      expect(error.code).toBe(504);
     }
   });
 
-  it('client should be able to send a notification to a server', (done) => {
+  it('client should be able to send a notification to a server', async () => {
     const { a, b } = mockTransports();
     const clientA = rawr({ transport: a });
     const clientB = rawr({ transport: b });
 
-    clientA.notifications.ondoSomething((someData) => {
-      someData.should.equal('testing_notification');
-      done();
+    const received = new Promise((resolve) => {
+      clientA.notifications.ondoSomething((someData) => {
+        resolve(someData);
+      });
     });
 
     clientB.notifiers.doSomething('testing_notification');
+
+    const result = await received;
+    expect(result).toBe('testing_notification');
   });
 
   it('client should have notifiersExt method', () => {
     const { a } = mockTransports();
     const client = rawr({ transport: a });
-    client.should.have.property('notifiersExt');
-    (typeof client.notifiersExt).should.equal('object');
+    expect(client).toHaveProperty('notifiersExt');
+    expect(client.notifiersExt).toBeTypeOf('object');
   });
 
-  it('client should be able to send a notification with notifiersExt', (done) => {
+  it('client should be able to send a notification with notifiersExt', async () => {
     const { a, b } = mockTransports();
     const clientA = rawr({ transport: a });
     const clientB = rawr({ transport: b });
 
-    clientA.notifications.ondoSomething((someData) => {
-      someData.should.equal('testing_notification_ext');
-      done();
+    const received = new Promise((resolve) => {
+      clientA.notifications.ondoSomething((someData) => {
+        resolve(someData);
+      });
     });
 
     clientB.notifiersExt.doSomething('testing_notification_ext');
+
+    const result = await received;
+    expect(result).toBe('testing_notification_ext');
   });
 
-  it('client should pass config to transport when using notifiersExt', (done) => {
+  it('client should pass config to transport when using notifiersExt', async () => {
     const { a, b } = mockTransports();
     const clientA = rawr({ transport: a });
     const clientB = rawr({ transport: b });
 
-    let receivedConfig = false;
+    let receivedConfig = null;
     a.on('config', (config) => {
-      config.should.deep.equal({ postMessageOptions: { transfer: ['test'] } });
-      receivedConfig = true;
+      receivedConfig = config;
     });
 
-    clientA.notifications.ondoConfigTest((someData) => {
-      someData.should.equal('config_test');
-      receivedConfig.should.equal(true);
-      done();
+    const received = new Promise((resolve) => {
+      clientA.notifications.ondoConfigTest((someData) => {
+        resolve(someData);
+      });
     });
 
     clientB.notifiersExt.doConfigTest('config_test', { postMessageOptions: { transfer: ['test'] } });
+
+    const result = await received;
+    expect(result).toBe('config_test');
+    expect(receivedConfig).toEqual({ postMessageOptions: { transfer: ['test'] } });
   });
 
   it('client should fail on a configured timeout', async () => {
@@ -190,23 +196,30 @@ describe('rawr', () => {
     const clientA = rawr({ transport: a, handlers: { slowFunction, hi } });
     const clientB = rawr({ transport: b, handlers: { slowFunction, add } });
 
+    // clientA calls slowFunction on clientB's handlers
     const resultA = await clientA.methodsExt.slowFunction({ timeout: 1000 });
-    resultA.should.equal('slow');
+    expect(resultA).toBe('slow');
+
+    // clientA calls add on clientB's handlers
     const resultA2 = await clientA.methodsExt.add(1, 2, null);
-    resultA2.should.equal(3);
+    expect(resultA2).toBe(3);
+
+    // clientB calls slowFunction on clientA's handlers, but times out
     try {
       await clientB.methodsExt.slowFunction({ timeout: 100 });
-    
+      expect.fail('Should have thrown');
     } catch (error) {
-      error.code.should.equal(504);
+      expect(error.code).toBe(504);
     }
+
     try {
       await clientB.methodsExt.slowFunction('useless param', { timeout: 100 });
+      expect.fail('Should have thrown');
     } catch (error) {
-      error.code.should.equal(504);
+      expect(error.code).toBe(504);
     }
-    const resultB2 = await clientB.methodsExt.hi();
-    resultB2.should.equal('hi');
 
+    const resultB2 = await clientB.methodsExt.hi();
+    expect(resultB2).toBe('hi');
   });
 });
