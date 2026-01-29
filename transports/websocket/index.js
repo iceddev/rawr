@@ -23,7 +23,7 @@ export default function websocket(socket, allowBinary = false) {
     }
 
     // Node.js ws Buffer
-    if (Buffer && Buffer.isBuffer(str)) {
+    if (typeof Buffer !== 'undefined' && Buffer.isBuffer(str)) {
       str = str.toString();
     }
 

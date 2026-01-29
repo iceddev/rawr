@@ -259,7 +259,7 @@ var Rawr = (() => {
           str = await new Response(str).text().catch(() => null);
         }
       }
-      if (Buffer && Buffer.isBuffer(str)) {
+      if (typeof Buffer !== "undefined" && Buffer.isBuffer(str)) {
         str = str.toString();
       }
       if (typeof str === "string") {
